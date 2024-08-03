@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #messageLog {
+            height: 300px;
+            border: 1px solid #ccc;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        input, button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Client</h1>
+    <div id="messageLog"></div>
+    <input type="text" id="messageInput" placeholder="Enter a message">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="getHistory()">Get History</button>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:8080/ws');
+        const messageLog = document.getElementById('messageLog');
+        const messageInput = document.getElementById('messageInput');
+
+        socket.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+            logMessage('Received: ' + message.content);
+        };
+
+        function sendMessage() {
+            const message = messageInput.value;
+            if (message) {
+                socket.send(JSON.stringify({content: message}));
+                logMessage('Sent: ' + message);
+                messageInput.value = '';
+            }
+        }
+
+        function getHistory() {
+            socket.send(JSON.stringify({content: 'HISTORY'}));
+        }
+
+        function logMessage(message) {
+            const p = document.createElement('p');
+            p.textContent = message;
+            messageLog.appendChild(p);
+            messageLog.scrollTop = messageLog.scrollHeight;
+        }
+    </script>
+</body>
+</html>
